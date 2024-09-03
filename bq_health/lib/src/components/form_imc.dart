@@ -6,39 +6,80 @@ class FormImc extends StatefulWidget {
 
   @override
   State<FormImc> createState() => _FormImcState();
-  // _ => classe privada, uso único dentro da classe
 }
 
 class _FormImcState extends State<FormImc> {
+  final TextEditingController _pesoController = TextEditingController();
+  final TextEditingController _alturaController = TextEditingController();
+
+  @override
+  void dispose() {
+    _pesoController.dispose();
+    _alturaController.dispose();
+    super.dispose();
+  }
+
+  // Função para validar se o valor é numérico
+  bool _isNumeric(String value) {
+    if (value.isEmpty) {
+      return false;
+    }
+    final number = num.tryParse(value);
+    return number != null;
+  }
+
+  void _calcularIMC() {
+    final pesoText = _pesoController.text;
+    final alturaText = _alturaController.text;
+
+    if (_isNumeric(pesoText) && _isNumeric(alturaText)) {
+      final peso = double.parse(pesoText);
+      final altura = double.parse(alturaText);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Result(peso: peso, altura: altura),
+        ),
+      );
+    } else {
+      // Mostra uma mensagem de erro se os valores não forem numéricos
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Por favor, insira valores válidos para peso e altura.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
         child: Column(
       children: [
         TextFormField(
+          controller: _pesoController,
           decoration: const InputDecoration(
             icon: Icon(Icons.scale),
             hintText: 'Qual seu peso?',
-            labelText: 'Peso',
+            labelText: 'Peso (kg)',
           ),
+          keyboardType: TextInputType.number, // Permite inserir apenas números
         ),
         TextFormField(
+          controller: _alturaController,
           decoration: const InputDecoration(
             icon: Icon(Icons.height),
             hintText: 'Qual sua altura?',
-            labelText: 'Altura',
+            labelText: 'Altura (m)',
           ),
+          keyboardType: TextInputType.number, // Permite inserir apenas números
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
-            
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Result()),
-              );
-            },
+            onPressed: _calcularIMC,
             style: styleButton,
             child: const Text(
               'Calcular',
@@ -56,6 +97,4 @@ var styleButton = ElevatedButton.styleFrom(
   backgroundColor: const Color.fromARGB(255, 94, 0, 27),
   elevation: 10, // Elevation
   shadowColor: const Color.fromARGB(255, 158, 158, 158),
-  // Shadow Color
 );
-//TAREFA: colocar um lugar pra peso, altura e um botão (textformfield)
