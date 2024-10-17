@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserir e Buscar Dados no MongoDB</title>
+    <link href="./output.css" rel="stylesheet">
+</head>
+<body>
+    <h1>Inserir Dados no MongoDB</h1>
+    <form id="insertForm">
+        <label for="name">Nome:</label>
+        <input type="text" id="name" name="name" required><br>
+        
+        <label for="age">Idade:</label>
+        <input type="text" id="age" name="age" required><br>
+        
+        <button type="submit">Inserir</button>
+    </form>
+
+    <h1>Buscar Usuários pelo Nome</h1>
+    <form id="searchForm">
+        <label for="searchName">Nome:</label>
+        <input type="text" id="searchName" name="searchName" required><br>
+        
+        <button type="submit">Buscar</button>
+    </form>
+
+    <div class="results" id="results"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

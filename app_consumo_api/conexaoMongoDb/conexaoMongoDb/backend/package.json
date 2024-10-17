@@ -1,0 +1,11 @@
+{
+    "name": "mongoDBtest-main",
+    "lockfileVersion": 3,
+    "requires": true,
+    "packages": {},
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.19.2",
+        "mongodb": "^6.8.1"
+    }
+}

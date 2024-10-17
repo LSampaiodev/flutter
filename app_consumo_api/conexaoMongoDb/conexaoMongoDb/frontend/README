@@ -1,0 +1,26 @@
+Prof. Léo - Exemplo básico de conexão com o MongoDb
+
+
+Abra o "backend" e realiza os passos:
+    1º altere as querys de conexão e afins no arquivo server.js no seu backend
+
+    2º configure seu banco de dados para a estrutura de nome e collection que está no server
+
+    3º no gerenciador de acessos do seu mongoAtlas, libere o ip da sua máquina
+        - abra o terminal, digite "ipconfig" e adicione o IPV6 no mongodb, para que sua máquina tenha acesso ao banco.
+    
+    4º instale o pacote do mongo db (utilize o gerenciador de preferência, utilizarei o NPM aqui)
+
+        npm install mongodb
+
+    5º instale o express
+        npm install express
+
+    6º atualize as bibliotecas:
+        npm install
+
+    7º inicialize o seu backend que fará as request para o banco de dados:
+        npm start
+
+    8º abre o formulário do frontend e tente enviar os dados para o seu backend q, 
+    consequentemente, enviará para o seu banco de dados.
