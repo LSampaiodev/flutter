@@ -1,58 +1,118 @@
 import 'package:flutter/material.dart';
+import '../models/language_model.dart';
 import '../services/api_service.dart';
+import 'add_language_screen.dart';
 
 class LanguageListScreen extends StatefulWidget {
   const LanguageListScreen({super.key});
 
   @override
-  LanguageListScreenState createState() => LanguageListScreenState();
+  _LanguageListScreenState createState() => _LanguageListScreenState();
 }
 
-class LanguageListScreenState extends State<LanguageListScreen> {
+class _LanguageListScreenState extends State<LanguageListScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<dynamic>> _languages;
+  List<Language> _languages = [];
 
   @override
   void initState() {
     super.initState();
-    _languages = _apiService.fetchLanguages(); // Chama a função para buscar as linguagens
+    _loadLanguages();
+  }
+
+  Future<void> _loadLanguages() async {
+    try {
+      final languages = await _apiService.getLanguages();
+      setState(() {
+        _languages = languages;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao carregar linguagens')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gerenciador de Estudos'),
+        title: const Text('Linguagens de Programação'),
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: _languages,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Erro: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Nenhuma linguagem cadastrada.'));
-          }
-
-          return ListView.builder(
-            itemCount: snapshot.data?.length,
-            itemBuilder: (context, index) {
-              final language = snapshot.data?[index];
-              return ListTile(
-                title: Text(language['name']),
-                subtitle: Text('Progresso: ${language['progress']}%'),
-              );
-            },
-          );
-        },
+      body: RefreshIndicator(
+        onRefresh: _loadLanguages,
+        child: ListView.builder(
+          itemCount: _languages.length,
+          itemBuilder: (context, index) {
+            final language = _languages[index];
+            return ListTile(
+              title: Text(language.name),
+              subtitle: Text(language.description),
+              trailing:
+                  Text('${(language.progress * 100).toStringAsFixed(0)}%'),
+              onTap: () => _showLanguageDetails(language),
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
+        onPressed: _addNewLanguage,
         child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.pushNamed(context, '/add'); // Navega para a tela de adicionar linguagem
-        },
       ),
     );
+  }
+
+  void _addNewLanguage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddLanguageScreen()),
+    );
+
+    if (result == true) {
+      _loadLanguages();
+    }
+  }
+
+  void _showLanguageDetails(Language language) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(language.name),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Descrição: ${language.description}'),
+            const SizedBox(height: 10),
+            Text('Progresso: ${(language.progress * 100).toStringAsFixed(0)}%'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
+          ),
+          TextButton(
+            onPressed: () => _deleteLanguage(language),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteLanguage(Language language) async {
+    try {
+      await _apiService.deleteLanguage(language.id!);
+      Navigator.pop(context);
+      _loadLanguages();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Linguagem excluída com sucesso')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao excluir linguagem')),
+      );
+    }
   }
 }
