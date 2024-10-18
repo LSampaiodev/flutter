@@ -2,20 +2,14 @@ import 'package:flutter/material.dart';
 import '../models/language_model.dart';
 import '../services/api_service.dart';
 
-class AddLanguageScreen extends StatefulWidget {
-  const AddLanguageScreen({super.key});
+class AdddLanguageScreen extends StatelessWidget {
+  final Function(Language) onLanguageAdded;
 
-  @override
-  _AddLanguageScreenState createState() => _AddLanguageScreenState();
-}
+  AdddLanguageScreen({super.key, required this.onLanguageAdded});
 
-class _AddLanguageScreenState extends State<AddLanguageScreen> {
-  final _formKey = GlobalKey<FormState>();
   final ApiService _apiService = ApiService();
-
-  String _name = '';
-  String _description = '';
-  double _progress = 0.0;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -23,39 +17,20 @@ class _AddLanguageScreenState extends State<AddLanguageScreen> {
       appBar: AppBar(
         title: const Text('Adicionar Nova Linguagem'),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           children: [
-            TextFormField(
+            TextField(
+              controller: _nameController,
               decoration: const InputDecoration(labelText: 'Nome da Linguagem'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor, insira o nome da linguagem';
-                }
-                return null;
-              },
-              onSaved: (value) => _name = value!,
             ),
-            TextFormField(
+            TextField(
+              controller: _descriptionController,
               decoration: const InputDecoration(labelText: 'Descrição'),
-              onSaved: (value) => _description = value ?? '',
-            ),
-            Slider(
-              value: _progress,
-              onChanged: (value) {
-                setState(() {
-                  _progress = value;
-                });
-              },
-              min: 0,
-              max: 1,
-              divisions: 100,
-              label: '${(_progress * 100).round()}%',
             ),
             ElevatedButton(
-              onPressed: _submitForm,
+              onPressed: () => _submitForm(context),
               child: const Text('Adicionar Linguagem'),
             ),
           ],
@@ -64,19 +39,27 @@ class _AddLanguageScreenState extends State<AddLanguageScreen> {
     );
   }
 
-  void _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      try {
-        await _apiService.createLanguage(
-          Language(name: _name, description: _description, progress: _progress),
-        );
-        Navigator.pop(context, true);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao adicionar linguagem')),
-        );
-      }
+  void _submitForm(BuildContext context) async {
+    final name = _nameController.text;
+    final description = _descriptionController.text;
+
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, insira o nome da linguagem')),
+      );
+      return;
+    }
+
+    try {
+      final newLanguage = await _apiService.createLanguage(
+        Language(name: name, description: description, progress: 0),
+      );
+      onLanguageAdded(newLanguage);
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao adicionar linguagem')),
+      );
     }
   }
 }

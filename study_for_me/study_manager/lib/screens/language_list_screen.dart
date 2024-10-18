@@ -62,15 +62,19 @@ class _LanguageListScreenState extends State<LanguageListScreen> {
     );
   }
 
-  void _addNewLanguage() async {
-    final result = await Navigator.push(
+  void _addNewLanguage() {
+    Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddLanguageScreen()),
+      MaterialPageRoute(
+        builder: (context) => AdddLanguageScreen(
+          onLanguageAdded: (Language newLanguage) {
+            setState(() {
+              _languages.add(newLanguage);
+            });
+          },
+        ),
+      ),
     );
-
-    if (result == true) {
-      _loadLanguages();
-    }
   }
 
   void _showLanguageDetails(Language language) {
@@ -105,7 +109,9 @@ class _LanguageListScreenState extends State<LanguageListScreen> {
     try {
       await _apiService.deleteLanguage(language.id!);
       Navigator.pop(context);
-      _loadLanguages();
+      setState(() {
+        _languages.removeWhere((l) => l.id == language.id);
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Linguagem excluída com sucesso')),
       );
